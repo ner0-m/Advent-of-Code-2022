@@ -1,9 +1,18 @@
 cmake_minimum_required(VERSION 3.18)
 project(AOC2022)
 
+# Set to C++20 and enforce it
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# create the `compile_commands.json` for clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# nice colored output :-)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
+    set(CMAKE_COLOR_DIAGNOSTICS ON)
+endif()
 
 function(add_day day)
   set(exec day${day})
