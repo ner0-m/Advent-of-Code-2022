@@ -13,22 +13,17 @@
 int priority(char c) {
   if (c >= 'a' && c <= 'z') {
     // [a-z]
-    return static_cast<int>(c) - 97 + 1;
+    return static_cast<int>(c - 'a') + 1;
   }
   // [A-Z]
-  return static_cast<int>(c) - 65 + 27;
+  return static_cast<int>(c - 'A') + 27;
 }
 
 std::string contains(std::string_view s1, std::string_view s2) {
-  std::string contained;
-  for (auto c : s1) {
-    auto pos = std::find(s2.begin(), s2.end(), c);
-
-    if (pos != s2.end()) {
-      contained.push_back(c);
-    }
-  }
-  return contained;
+  return s1 | ranges::views::remove_if([s2](auto c) {
+           return !ranges::binary_search(s2, c);
+         }) |
+         ranges::to<std::string>;
 }
 
 void sum_of_priorities(const std::vector<std::string> &in) {
