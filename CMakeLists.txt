@@ -20,5 +20,5 @@ add_library(common src/common/input.cpp)
 target_include_directories(
   common PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
 
-add_day("02" src/day02/main.cpp)
-add_day("03" src/day03/main.cpp)
+add_day("02" src/day02.cpp)
+add_day("03" src/day03.cpp)
