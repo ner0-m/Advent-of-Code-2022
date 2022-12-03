@@ -8,14 +8,7 @@
 #include <fmt/ranges.h>
 #include <range/v3/all.hpp>
 
-std::vector<std::string> input() {
-  std::vector<std::string> in;
-  std::string line;
-  while (std::getline(std::cin, line)) {
-    in.push_back(line);
-  }
-  return in;
-}
+#include "input.hpp"
 
 struct Rock {};
 struct Paper {};

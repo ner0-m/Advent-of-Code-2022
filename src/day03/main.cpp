@@ -8,14 +8,7 @@
 #include <fmt/ranges.h>
 #include <range/v3/all.hpp>
 
-std::vector<std::string> input() {
-  std::vector<std::string> in;
-  std::string line;
-  while (std::getline(std::cin, line)) {
-    in.push_back(line);
-  }
-  return in;
-}
+#include "input.hpp"
 
 int priority(char c) {
   if (c >= 'a' && c <= 'z') {
@@ -45,10 +38,10 @@ void sum_of_priorities(const std::vector<std::string> &in) {
         return std::make_tuple(x.substr(0, size), x.substr(size, x.size()));
       }) |
       ranges::views::transform([](auto t) {
-        auto first = std::move(std::get<0>(t)) | ranges::action::sort |
-                     ranges::action::unique;
-        auto second = std::move(std::get<1>(t)) | ranges::action::sort |
-                      ranges::action::unique;
+        auto first = std::move(std::get<0>(t)) | ranges::actions::sort |
+                     ranges::actions::unique;
+        auto second = std::move(std::get<1>(t)) | ranges::actions::sort |
+                      ranges::actions::unique;
         return std::make_tuple(first, second);
       }) |
       ranges::views::transform([](auto t) {
@@ -71,7 +64,7 @@ void sum_of_badge_priorities(const std::vector<std::string> &in) {
 
   auto halfes =
       in | ranges::views::transform([](auto x) {
-        return std::move(x) | ranges::action::sort | ranges::action::unique;
+        return std::move(x) | ranges::actions::sort | ranges::actions::unique;
       }) |
       ranges::views::chunk(3) | ranges::views::transform([](auto x) {
         auto first = ranges::begin(x);
@@ -79,8 +72,7 @@ void sum_of_badge_priorities(const std::vector<std::string> &in) {
                            *ranges::next(first, 2));
       }) |
       ranges::views::transform(
-          [](auto x) { return std::move(x) | ranges::action::sort; }) |
-      ranges::to<std::vector>;
+          [](auto x) { return std::move(x) | ranges::actions::sort; });
 
   auto chunked = halfes | ranges::views::transform([](auto x) {
                    auto slided =
@@ -92,11 +84,9 @@ void sum_of_badge_priorities(const std::vector<std::string> &in) {
                        }) |
                        ranges::views::transform(
                            [](auto y) { return priority(*ranges::begin(y)); });
-                   return slided | ranges::to<std::vector>;
-                 }) |
-                 ranges::views::join | ranges::to<std::vector>;
+                   return *ranges::begin(slided);
+                 });
 
-  fmt::print("Sum of badge priority: {}\n", chunked | ranges::views::take(10));
   auto sum = ranges::accumulate(chunked, 0);
   fmt::print("Sum of badge priority: {}\n", sum);
 }
