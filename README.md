@@ -8,7 +8,7 @@ trying to solve them using modern C++, mostly relying on range-v3.
 Run the following commands once this repository is checked out:
 
 ```sh
-git clone https://github.com/fmtlib/fmt.git external/fmt
+git clone https://github.com/ericniebler/range-v3.git external/range-v3
 git clone https://github.com/fmtlib/fmt.git external/fmt
 mkdir build && cd build
 cmake ..
