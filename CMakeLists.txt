@@ -16,7 +16,7 @@ endif()
 
 function(add_day day)
   set(exec day${day})
-  add_executable(${exec} ${ARGN})
+  add_executable(${exec} src/day${day}.cpp ${ARGN})
   target_link_libraries(${exec} common)
   target_include_directories(
     ${exec}
@@ -29,5 +29,6 @@ add_library(common src/common/input.cpp)
 target_include_directories(
   common PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
 
-add_day("02" src/day02.cpp)
-add_day("03" src/day03.cpp)
+add_day("02")
+add_day("03")
+add_day("04")
