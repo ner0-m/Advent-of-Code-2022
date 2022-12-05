@@ -57,24 +57,29 @@ std::vector<std::vector<int>>
 process_commands(const std::vector<std::string> &in) {
   std::vector<std::string> commands(in.begin() + 10, in.end());
 
-  auto cmd =
-      commands | ranges::views::transform([](auto x) {
-        // Split by spaces, then ensure that words are stored as string (avoid
-        // dangling), then remove all words, which are not numbers, then convert
-        // the strings to numbers
-        return x | ranges::views::split(' ') |
-               ranges::views::transform(
-                   [](auto word) { return word | ranges::to<std::string>; }) |
-               ranges::views::remove_if([](auto s) {
-                 return !ranges::accumulate(s, true, [](auto accu, auto c) {
-                   return accu && std::isdigit(static_cast<unsigned char>(c));
-                 });
-               }) |
-               ranges::views::transform(
-                   [](auto num) -> int { return std::stoi(num); }) |
-               ranges::to<std::vector>;
-      }) |
-      ranges::to<std::vector>;
+  auto word_to_string = [](auto word) {
+    return word | ranges::to<std::string>;
+  };
+
+  auto not_all_digits = [](auto str) {
+    return !ranges::accumulate(str, true, [](auto accu, auto c) {
+      return accu && std::isdigit(static_cast<unsigned char>(c));
+    });
+  };
+
+  auto to_int = [](auto str) { return std::stoi(str); };
+
+  auto cmd = commands | ranges::views::transform([&](auto x) {
+               // Split by spaces, then ensure that words are stored as string
+               // (avoid dangling), then remove all words, which are not
+               // numbers, then convert the strings to numbers
+               return x | ranges::views::split(' ') |
+                      ranges::views::transform(word_to_string) |
+                      ranges::views::remove_if(not_all_digits) |
+                      ranges::views::transform(to_int) |
+                      ranges::to<std::vector>;
+             }) |
+             ranges::to<std::vector>;
 
   return cmd;
 }
@@ -106,6 +111,10 @@ auto execute_commands(std::vector<std::deque<char>> stacks,
   ranges::for_each(cmds, [&](auto cmd) {
     auto [num, from, to] = unpack(cmd);
     move_fn(stacks, num, from, to);
+
+    // now delete the elements from the source stack
+    stacks[from - 1].erase(ranges::begin(stacks[from - 1]),
+                           ranges::begin(stacks[from - 1]) + num);
   });
 
   /* If I want to debug I can use this:
@@ -124,13 +133,14 @@ auto execute_commands(std::vector<std::deque<char>> stacks,
   });
   */
 
-  /// remove all but the first element of the stack (i.e. the top most element),
-  /// convert this to a string and return it
-  return stacks | ranges::views::transform([](auto x) {
-           auto t = x | ranges::views::take(1);
-           return static_cast<char>(*ranges::begin(t));
-         }) |
-         ranges::to<std::string>;
+  /// remove all but the first element of the stack (i.e. the top most
+  /// element), convert this to a string and return it
+  auto to_char = [](auto x) {
+    auto t = x | ranges::views::take(1);
+    return static_cast<char>(*ranges::begin(t));
+  };
+
+  return stacks | ranges::views::transform(to_char) | ranges::to<std::string>;
 }
 
 auto split_stacks(const std::vector<std::string> &in) {
@@ -145,14 +155,8 @@ void part1(const std::vector<std::string> &in) {
 
   // In part 1, each element is moved element by element
   auto move = [](auto &stacks, auto num, auto from, auto to) {
-    // copy the first num elements from the source stack to the destination
-    // stack
     ranges::copy(stacks[from - 1] | ranges::views::take(num),
                  std::front_inserter(stacks[to - 1]));
-
-    // now delete the elements from the source stack
-    stacks[from - 1].erase(ranges::begin(stacks[from - 1]),
-                           ranges::begin(stacks[from - 1]) + num);
   };
   auto top = execute_commands(stacks, commands, move);
 
@@ -162,16 +166,12 @@ void part1(const std::vector<std::string> &in) {
 void part2(const std::vector<std::string> &in) {
   auto [stacks, commands] = split_stacks(in);
 
+  // To move them "all at once", just reverse them first and then copy them
+  // bit by bit
   auto move = [](auto &stacks, auto num, auto from, auto to) {
-    // copy the first num elements in reversed order from the source stack to
-    // the destination stack
     ranges::copy(stacks[from - 1] | ranges::views::take(num) |
                      ranges::views::reverse,
                  std::front_inserter(stacks[to - 1]));
-
-    // now delete the elements from the source stack
-    stacks[from - 1].erase(ranges::begin(stacks[from - 1]),
-                           ranges::begin(stacks[from - 1]) + num);
   };
 
   auto top = execute_commands(stacks, commands, move);
